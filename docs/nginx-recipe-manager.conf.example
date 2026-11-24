@@ -1,0 +1,29 @@
+# Example for nginx running on a separate machine from this app (the usual setup in this
+# household's stack -- see the Sophia repo's docs/NGINX.md for the same pattern).
+# Replace recipes.paradoxliving.org, the upstream IP/port and certificate paths as needed.
+server {
+    listen 80;
+    server_name recipes.paradoxliving.org;
+    return 301 https://recipes.paradoxliving.org$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name recipes.paradoxliving.org;
+    ssl_certificate /etc/letsencrypt/live/recipes.paradoxliving.org/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/recipes.paradoxliving.org/privkey.pem;
+
+    location / {
+        proxy_pass http://192.168.51.67:8807;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Authorization $http_authorization;
+        proxy_set_header Connection "";
+        proxy_connect_timeout 10s;
+        proxy_read_timeout 60s;
+        proxy_send_timeout 60s;
+    }
+}
