@@ -37,7 +37,8 @@ async function loadList() {
     const card = document.createElement('div');
     card.className = 'recipe-card';
     const kind = r.variation_kind ? `<span class="tag">${esc(r.variation_kind)}</span>` : '';
-    card.innerHTML = `<h3>${esc(r.title)}${r.favorite ? ' ★' : ''}</h3>
+    const thumb = r.image_url ? `<img class="thumb" src="${esc(r.image_url)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : '';
+    card.innerHTML = `${thumb}<h3>${esc(r.title)}${r.favorite ? ' ★' : ''}</h3>
       <div class="meta">${esc(r.source_name || '')} ${kind}</div>
       <div>${(r.tags || []).map((t) => `<span class="tag">${esc(t)}</span>`).join('')}</div>`;
     card.onclick = () => showDetail(r.id);
@@ -83,6 +84,7 @@ async function renderDetail() {
     <h2>${esc(r.title)} ${r.favorite ? '★' : ''}</h2>
     <div class="meta">${esc(r.source_name || '')} ${r.source_url ? `&middot; <a href="${esc(r.source_url)}" target="_blank">source</a>` : ''}
       ${r.servings ? `&middot; serves ${esc(r.servings)}` : ''}</div>
+    ${r.image_url ? `<img class="hero" src="${esc(r.image_url)}" alt="" referrerpolicy="no-referrer">` : ''}
     ${lineageHtml}${variationsHtml}
     <div class="actions">
       <button id="fav-btn">${r.favorite ? 'Unfavorite' : 'Favorite'}</button>
@@ -95,7 +97,7 @@ async function renderDetail() {
     <ul>${r.ingredients.map((i) => `<li>${esc(i)}</li>`).join('')}</ul>
     <h3>Steps</h3>
     <ol>${r.steps.map((s) => `<li>${esc(s)}</li>`).join('')}</ol>
-    ${r.notes ? `<h3>Notes</h3><p>${esc(r.notes)}</p>` : ''}
+    ${r.notes ? `<h3>Notes</h3><p class="notes">${esc(r.notes)}</p>` : ''}
   `;
   $$('#detail-content [data-goto]').forEach((a) => a.onclick = (e) => { e.preventDefault(); showDetail(a.dataset.goto); });
   $('#fav-btn').onclick = () => toggleFavorite(r);

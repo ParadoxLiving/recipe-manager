@@ -16,7 +16,7 @@ step easy for Sophia to call without holding a token.
 | `GET /api/recipes/{id}` | - | Full recipe; 404 if absent |
 | `GET /api/recipes/{id}/variations` | - | Direct children (summaries) |
 | `GET /api/recipes/{id}/lineage` | - | Ancestor chain, closest first (summaries) |
-| `POST /api/recipes` | `{title, ingredients[], steps[], servings?, notes?, tags[]?, favorite?, source_url?, source_name?}` | Create a new recipe from scratch; 201 |
+| `POST /api/recipes` | `{title, ingredients[], steps[], servings?, notes?, tags[]?, favorite?, source_url?, source_name?, image_url?}` | Create a new recipe from scratch; 201 |
 | `GET /api/sources/themealdb/search?q=` | - | `{"items": [{"id","title","thumbnail"}]}` from TheMealDB |
 | `POST /api/import/themealdb/{meal_id}` | - | Fetch that TheMealDB recipe and save it; 201 |
 | `POST /api/import/url` | `{"url"}` | Scrape a recipe site via `recipe-scrapers` (schema.org `Recipe` JSON-LD) and save it; 201; 502 if the page has no parseable recipe |

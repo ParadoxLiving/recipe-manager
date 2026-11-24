@@ -30,6 +30,7 @@ def fetch(meal_id):
         'ingredients': ingredients,
         'steps': steps,
         'servings': None,
+        'image_url': meal.get('strMealThumb'),
         'source_url': meal.get('strSource') or f'https://www.themealdb.com/meal/{meal_id}',
         'source_name': NAME,
     }

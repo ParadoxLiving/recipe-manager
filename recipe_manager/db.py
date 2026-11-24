@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS recipes (
     favorite INTEGER NOT NULL DEFAULT 0,
     source_url TEXT,
     source_name TEXT,
+    image_url TEXT,
     parent_id TEXT REFERENCES recipes(id),
     variation_kind TEXT,            -- 'improvement', 'scale', 'merge', 'edit', or null for an original
     merged_from TEXT,               -- JSON list of recipe IDs, only set for a merge
@@ -33,7 +34,7 @@ CREATE INDEX IF NOT EXISTS idx_recipes_parent ON recipes(parent_id);
 CREATE INDEX IF NOT EXISTS idx_recipes_title ON recipes(title);
 """
 
-LIST_FIELDS = ('id', 'title', 'servings', 'tags', 'favorite', 'source_url', 'source_name',
+LIST_FIELDS = ('id', 'title', 'servings', 'tags', 'favorite', 'source_url', 'source_name', 'image_url',
                'parent_id', 'variation_kind', 'merged_from', 'created_at', 'updated_at')
 
 
@@ -45,6 +46,8 @@ class RecipeStore:
         self.conn.row_factory = sqlite3.Row
         self.conn.execute('PRAGMA foreign_keys = ON')
         self.conn.executescript(SCHEMA)
+        if 'image_url' not in {r[1] for r in self.conn.execute('PRAGMA table_info(recipes)')}:
+            self.conn.execute('ALTER TABLE recipes ADD COLUMN image_url TEXT')
         self.conn.commit()
 
     @staticmethod
@@ -58,16 +61,17 @@ class RecipeStore:
         return d
 
     def create(self, title, ingredients, steps, servings=None, notes=None, tags=None, favorite=False,
-               source_url=None, source_name=None, parent_id=None, variation_kind=None, merged_from=None):
+               source_url=None, source_name=None, parent_id=None, variation_kind=None, merged_from=None,
+               image_url=None):
         recipe_id = uuid.uuid4().hex
         now = time.time()
         self.conn.execute(
             'INSERT INTO recipes (id, title, ingredients, steps, servings, notes, tags, favorite, source_url, '
-            'source_name, parent_id, variation_kind, merged_from, created_at, updated_at) '
-            'VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+            'source_name, parent_id, variation_kind, merged_from, created_at, updated_at, image_url) '
+            'VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
             (recipe_id, title, json.dumps(ingredients), json.dumps(steps), servings, notes,
              json.dumps(tags or []), int(bool(favorite)), source_url, source_name, parent_id,
-             variation_kind, json.dumps(merged_from) if merged_from else None, now, now))
+             variation_kind, json.dumps(merged_from) if merged_from else None, now, now, image_url))
         self.conn.commit()
         return self.get(recipe_id)
 
@@ -78,7 +82,7 @@ class RecipeStore:
     def update(self, recipe_id, **fields):
         if not self.get(recipe_id):
             return None
-        allowed = {'title', 'ingredients', 'steps', 'servings', 'notes', 'tags', 'favorite', 'source_url', 'source_name'}
+        allowed = {'title', 'ingredients', 'steps', 'servings', 'notes', 'tags', 'favorite', 'source_url', 'source_name', 'image_url'}
         sets, values = [], []
         for key, value in fields.items():
             if key not in allowed:
@@ -99,9 +103,14 @@ class RecipeStore:
         return self.get(recipe_id)
 
     def delete(self, recipe_id):
-        cur = self.conn.execute('DELETE FROM recipes WHERE id = ?', (recipe_id,))
+        row = self.conn.execute('SELECT parent_id FROM recipes WHERE id = ?', (recipe_id,)).fetchone()
+        if not row:
+            return False
+        # Variations of the deleted recipe move up to its own parent (or become originals).
+        self.conn.execute('UPDATE recipes SET parent_id = ? WHERE parent_id = ?', (row['parent_id'], recipe_id))
+        self.conn.execute('DELETE FROM recipes WHERE id = ?', (recipe_id,))
         self.conn.commit()
-        return cur.rowcount > 0
+        return True
 
     def list(self, query=None, tag=None, favorite=None, limit=100, offset=0):
         clauses, params = [], []

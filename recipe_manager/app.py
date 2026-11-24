@@ -23,7 +23,7 @@ WEB_DIR = Path(__file__).parent / 'web'
 def summary(recipe):
     """The list view: no ingredients/steps body, to keep listings light."""
     return {k: recipe[k] for k in (
-        'id', 'title', 'servings', 'tags', 'favorite', 'source_url', 'source_name',
+        'id', 'title', 'servings', 'tags', 'favorite', 'source_url', 'source_name', 'image_url',
         'parent_id', 'variation_kind', 'merged_from', 'created_at', 'updated_at')}
 
 
@@ -98,7 +98,8 @@ def create_app(config_path=None, token=None):
             raise HTTPException(422, 'steps must be a list of strings')
         return store.create(title.strip(), ingredients, steps, servings=body.get('servings'),
                              notes=body.get('notes'), tags=body.get('tags'), favorite=body.get('favorite', False),
-                             source_url=body.get('source_url'), source_name=body.get('source_name', 'manual'))
+                             source_url=body.get('source_url'), source_name=body.get('source_name', 'manual'),
+                             image_url=body.get('image_url'))
 
     @app.get('/api/sources/themealdb/search')
     def themealdb_search(q: str):
@@ -116,7 +117,8 @@ def create_app(config_path=None, token=None):
         except Exception as exc:
             raise HTTPException(502, f'TheMealDB lookup failed: {exc}') from None
         return store.create(data['title'], data['ingredients'], data['steps'], servings=data['servings'],
-                             source_url=data['source_url'], source_name=data['source_name'])
+                             source_url=data['source_url'], source_name=data['source_name'],
+                             image_url=data.get('image_url'), notes=data.get('notes'))
 
     @app.post('/api/import/url', status_code=201)
     def import_url(body: dict):
@@ -128,7 +130,8 @@ def create_app(config_path=None, token=None):
         except Exception as exc:
             raise HTTPException(502, f"Couldn't read a recipe from that page: {exc}") from None
         return store.create(data['title'], data['ingredients'], data['steps'], servings=data['servings'],
-                             source_url=data['source_url'], source_name=data['source_name'])
+                             source_url=data['source_url'], source_name=data['source_name'],
+                             image_url=data.get('image_url'), notes=data.get('notes'))
 
     # ---- LLM-backed improve/merge: propose (no auth, nothing saved), then save explicitly ----
 
@@ -156,8 +159,10 @@ def create_app(config_path=None, token=None):
             raise HTTPException(422, 'title is required')
         if not isinstance(ingredients, list) or not isinstance(steps, list):
             raise HTTPException(422, 'ingredients and steps must be lists of strings')
+        parent = store.get(recipe_id)
         return store.create(title.strip(), ingredients, steps, servings=body.get('servings'),
                              notes=body.get('notes'), tags=body.get('tags'), parent_id=recipe_id,
+                             image_url=body.get('image_url') or parent.get('image_url'),
                              variation_kind=body.get('variation_kind', 'improvement'),
                              source_name=body.get('source_name', 'variation'))
 
@@ -192,6 +197,7 @@ def create_app(config_path=None, token=None):
             raise HTTPException(422, 'ingredients and steps must be lists of strings')
         return store.create(title.strip(), ingredients, steps, servings=body.get('servings'),
                              notes=body.get('notes'), tags=body.get('tags'), merged_from=ids,
+                             image_url=body.get('image_url') or store.get(ids[0]).get('image_url'),
                              variation_kind='merge', source_name=body.get('source_name', 'merge'))
 
     # ---- Changing or deleting an existing saved recipe (bearer token required) ----
