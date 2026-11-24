@@ -1,0 +1,10 @@
+{
+  "db_path": "data/recipes.db",
+  "nexus": {
+    "url": "http://127.0.0.1:8790",
+    "token_env": "RECIPE_NEXUS_TOKEN",
+    "model": null,
+    "target_node": null,
+    "timeout": 180
+  }
+}

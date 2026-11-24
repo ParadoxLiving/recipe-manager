@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recipe Manager</title>
+<link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+<header>
+  <h1>Recipe Manager</h1>
+  <div class="token-box">
+    <label>Admin token (for edit/delete)
+      <input id="token" type="password" placeholder="paste token to enable editing">
+    </label>
+  </div>
+</header>
+
+<main>
+  <section id="list-view">
+    <div class="toolbar">
+      <input id="search" type="search" placeholder="Search saved recipes...">
+      <label><input id="favorite-only" type="checkbox"> Favorites only</label>
+      <button id="new-recipe-btn">+ New recipe</button>
+      <button id="import-btn">Import</button>
+    </div>
+    <div id="recipe-list" class="recipe-grid"></div>
+  </section>
+
+  <section id="detail-view" class="hidden">
+    <button id="back-btn">&larr; Back</button>
+    <div id="detail-content"></div>
+  </section>
+</main>
+
+<dialog id="import-dialog">
+  <h2>Import a recipe</h2>
+  <div class="tabs">
+    <button data-tab="url" class="tab active">From a URL</button>
+    <button data-tab="themealdb" class="tab">From TheMealDB</button>
+  </div>
+  <div data-tab-panel="url">
+    <input id="import-url" type="url" placeholder="https://example.com/some-recipe" style="width:100%">
+    <button id="import-url-btn">Import</button>
+  </div>
+  <div data-tab-panel="themealdb" class="hidden">
+    <input id="themealdb-query" type="text" placeholder="e.g. chicken, pasta...">
+    <button id="themealdb-search-btn">Search</button>
+    <div id="themealdb-results"></div>
+  </div>
+  <button id="import-close-btn">Close</button>
+</dialog>
+
+<dialog id="edit-dialog">
+  <h2 id="edit-title">Edit recipe</h2>
+  <form id="edit-form">
+    <label>Title <input id="edit-field-title" required></label>
+    <label>Servings <input id="edit-field-servings"></label>
+    <label>Tags (comma separated) <input id="edit-field-tags"></label>
+    <label>Ingredients (one per line)
+      <textarea id="edit-field-ingredients" rows="8" required></textarea>
+    </label>
+    <label>Steps (one per line)
+      <textarea id="edit-field-steps" rows="8" required></textarea>
+    </label>
+    <label>Notes <textarea id="edit-field-notes" rows="2"></textarea></label>
+    <div class="dialog-actions">
+      <button type="submit" id="edit-save-btn">Save</button>
+      <button type="button" id="edit-cancel-btn">Cancel</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="llm-dialog">
+  <h2 id="llm-title">Improve this recipe</h2>
+  <div id="llm-input">
+    <label id="llm-instructions-label">What would you like changed?
+      <input id="llm-instructions" placeholder="e.g. make it healthier, scale to 8 servings...">
+    </label>
+    <button id="llm-propose-btn">Ask the LLM</button>
+  </div>
+  <div id="llm-proposal" class="hidden"></div>
+  <button id="llm-close-btn">Close</button>
+</dialog>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

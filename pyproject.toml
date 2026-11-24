@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "recipe-manager"
+version = "0.1.0"
+description = "Personal recipe manager: save, import, search, and LLM-assisted improve/merge, with a REST API for Sophia"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115,<1",
+    "uvicorn[standard]>=0.30,<1",
+    "httpx>=0.27,<1",
+    "recipe-scrapers>=15,<16",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8,<10"]
+
+[project.scripts]
+recipe-manager = "recipe_manager.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["recipe_manager*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -1,0 +1,61 @@
+:root {
+  --bg: #fafaf7;
+  --fg: #2a2520;
+  --muted: #7a7163;
+  --card: #ffffff;
+  --border: #e4ddd0;
+  --accent: #b5582a;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1c1a17;
+    --fg: #ece6da;
+    --muted: #a69c8c;
+    --card: #262320;
+    --border: #3a352e;
+    --accent: #e07a3f;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: -apple-system, system-ui, "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+}
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+h1 { margin: 0; font-size: 1.4rem; }
+main { padding: 1rem 1.5rem; max-width: 1000px; margin: 0 auto; }
+.toolbar { display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; align-items: center; }
+.toolbar input[type="search"] { flex: 1; min-width: 150px; padding: 0.5rem; }
+input, textarea, button { font-size: 1rem; border-radius: 6px; border: 1px solid var(--border); padding: 0.4rem 0.6rem; background: var(--card); color: var(--fg); }
+button { cursor: pointer; }
+button:hover { border-color: var(--accent); }
+.recipe-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0.75rem; }
+.recipe-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem; cursor: pointer; }
+.recipe-card:hover { border-color: var(--accent); }
+.recipe-card h3 { margin: 0 0 0.25rem; font-size: 1.05rem; }
+.recipe-card .meta { color: var(--muted); font-size: 0.85rem; }
+.tag { display: inline-block; background: var(--border); border-radius: 10px; padding: 0 0.5rem; font-size: 0.75rem; margin-right: 0.25rem; }
+.hidden { display: none !important; }
+#detail-content h2 { margin-top: 0; }
+#detail-content .actions { display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 1rem 0; }
+#detail-content ul, #detail-content ol { padding-left: 1.3rem; }
+.lineage { color: var(--muted); font-size: 0.9rem; margin-bottom: 0.5rem; }
+dialog { border-radius: 10px; border: 1px solid var(--border); background: var(--card); color: var(--fg); max-width: 500px; width: 90%; }
+dialog form, dialog > div { display: flex; flex-direction: column; gap: 0.5rem; }
+.dialog-actions { display: flex; gap: 0.5rem; justify-content: flex-end; }
+.tabs { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
+.tab.active { border-color: var(--accent); color: var(--accent); }
+.result-item { display: flex; justify-content: space-between; align-items: center; padding: 0.3rem 0; border-bottom: 1px solid var(--border); }
+.error { color: #c0392b; }
+.notice { color: var(--muted); font-style: italic; }
+.token-box input { width: 220px; }
